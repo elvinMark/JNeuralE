@@ -2,24 +2,28 @@ package com.etest;
 
 import com.emath.*;
 import com.eneural.*;
+import com.eutil.*;
 import java.util.*;
 
 public class eTest{
     public static void main(String args[]){
         eSequentialModel model = new eSequentialModel();
 	model.addLayer(new eLinearLayer(2,3));
-	model.addLayer(new eSigmoidLayer());
+	model.addLayer(new eReLULayer());
 	model.addLayer(new eLinearLayer(3,2));
-	model.addLayer(new eSigmoidLayer());
+	model.addLayer(new eReLULayer());
 
-	double[][] in_data = {{0,0},{1,0},{0,1},{1,1}};
-	double[][] out_data = {{1,0},{0,1},{0,1},{1,0}};
-	eMatrix x = new eMatrix(4,2,in_data);
-	eMatrix y = new eMatrix(4,2,out_data);
+	model.addLayer(new eSoftmaxLayer());
 
-        ArrayList<eMatrix[]> ds = eDataset.generateDataset(x,y,4);
+	double[][][] regions = {{{0,0},{0.5,0.5}}};
+	eMatrix[] data = eDataGenerator.generate2DClassifyData(regions,20);
 
-	model.train(ds,1000,new eMSELoss(), new eAdamOptimizer(1,0.5));
-	model.forward(x).print();
+	data[0].print();
+	data[1].print();
+	
+	ArrayList<eMatrix[]> ds = eDataset.generateDataset(data[0],data[1],4);
+	
+	model.train(ds,1000,new eCrossEntropyLoss(), new eAdamOptimizer(0.1,0.2));
+	model.forward(data[0]).print();
     }
 }
